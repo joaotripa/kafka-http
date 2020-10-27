@@ -6,29 +6,29 @@ This demo uses Docker and docker-compose to deploy confluent platform and uses k
 
 1. **Launch the kafka stack**
 
-	docker-compose up -d
+	docker-compose up -d  
 
 2. **Make sure everything is up and running**
 
-	docker-compose ps
+	docker-compose ps  
 
 3. **Create a test topic and some data using ksqlDB**
 
-	docker exec -it ksqldb-server ksql http://ksqldb-server:8088
+	docker exec -it ksqldb-server ksql http://ksqldb-server:8088  
 
-	CREATE STREAM riderLocations (profileId VARCHAR, latitude DOUBLE, longitude DOUBLE) WITH (kafka_topic='locations', value_format='json', partitions=1);
+	CREATE STREAM riderLocations (profileId VARCHAR, latitude DOUBLE, longitude DOUBLE) WITH (kafka_topic='locations', value_format='json', partitions=1);  
 
-	SHOW STREAMS;
+	SHOW STREAMS;  
 	SHOW TOPICS;
 	
-	INSERT INTO riderLocations (profileId, latitude, longitude) VALUES ('c2309eec', 37.7877, -122.4205);
-	INSERT INTO riderLocations (profileId, latitude, longitude) VALUES ('18f4ea86', 37.3903, -122.0643);
-	INSERT INTO riderLocations (profileId, latitude, longitude) VALUES ('4ab5cbad', 37.3952, -122.0813);
-	INSERT INTO riderLocations (profileId, latitude, longitude) VALUES ('8b6eae59', 37.3944, -122.0813);
-	INSERT INTO riderLocations (profileId, latitude, longitude) VALUES ('4a7c7b41', 37.4049, -122.0822);
-	INSERT INTO riderLocations (profileId, latitude, longitude) VALUES ('4ddad000', 37.7857, -122.4011);
+	INSERT INTO riderLocations (profileId, latitude, longitude) VALUES ('c2309eec', 37.7877, -122.4205);  
+	INSERT INTO riderLocations (profileId, latitude, longitude) VALUES ('18f4ea86', 37.3903, -122.0643);  
+	INSERT INTO riderLocations (profileId, latitude, longitude) VALUES ('4ab5cbad', 37.3952, -122.0813);  
+	INSERT INTO riderLocations (profileId, latitude, longitude) VALUES ('8b6eae59', 37.3944, -122.0813);  
+	INSERT INTO riderLocations (profileId, latitude, longitude) VALUES ('4a7c7b41', 37.4049, -122.0822);  
+	INSERT INTO riderLocations (profileId, latitude, longitude) VALUES ('4ddad000', 37.7857, -122.4011);  
 
-	PRINT locations FROM BEGINNING;
+	PRINT locations FROM BEGINNING;  
 
 4. **Produce data using the Kakfa Rest Proxy**
 
