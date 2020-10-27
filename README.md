@@ -4,20 +4,19 @@ This demo uses Docker and docker-compose to deploy confluent platform and uses k
 
 ## Getting started
 
-1. Launch the kafka stack
+1. **Launch the kafka stack**
 
 	docker-compose up -d
 
-2. Make sure everything is up and running
+2. **Make sure everything is up and running**
 
 	docker-compose ps
 
-3. Create a test topic and some data using ksqlDB
+3. **Create a test topic and some data using ksqlDB**
 
 	docker exec -it ksqldb-server ksql http://ksqldb-server:8088
 
-	CREATE STREAM riderLocations (profileId VARCHAR, latitude DOUBLE, longitude DOUBLE)
-  WITH (kafka_topic='locations', value_format='json', partitions=1);
+	CREATE STREAM riderLocations (profileId VARCHAR, latitude DOUBLE, longitude DOUBLE) WITH (kafka_topic='locations', value_format='json', partitions=1);
 
 	SHOW STREAMS;
 	SHOW TOPICS;
@@ -31,7 +30,7 @@ This demo uses Docker and docker-compose to deploy confluent platform and uses k
 
 	PRINT locations FROM BEGINNING;
 
-4. Produce data using the Kakfa Rest Proxy
+4. **Produce data using the Kakfa Rest Proxy**
 
 To send a POST request using the Rest Proxy container, we need to know it's IP Address (docker containers have their own network, therefore sending requests to 'localhost' will not work).
 
@@ -48,7 +47,7 @@ Returning to ksql terminal, let's check if data was received
 
 	PRINT locations FROM BEGINNING;
 
-5. Stream the data to the api with Kafka Connect
+5. **Stream the data to the api with Kafka Connect**
 
 We'll be using ksqlDB to create the connector but Kafka REST Proxy can be used as well.
 
@@ -80,14 +79,14 @@ Creating the http sink connector. Copy the IP address given by the commands abov
 
 	SHOW CONNECTORS;
 
-6. Testing 
+6. **Testing**
 
-To test the connecor, open a terminal and send a request to the API that returns the messages sent by kafka.
+To test the connector, open a terminal and send a request to the API that returns the messages sent by kafka.
 
 	curl -X GET http://${KAFKA_API_HOST}:5000/api/v1/getmessages
 
 ### Useful links
 
-https://docs.confluent.io/current/connect/kafka-connect-http/index.html
-https://docs.confluent.io/current/connect/managing/extending.html
-https://ksqldb.io/quickstart.html
+https://docs.confluent.io/current/connect/kafka-connect-http/index.html  
+https://docs.confluent.io/current/connect/managing/extending.html  
+https://ksqldb.io/quickstart.html  
