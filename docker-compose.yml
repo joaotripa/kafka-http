@@ -154,6 +154,7 @@ services:
 
 #Other systems
   kafka-api:
+    build: ./app/
     image: kafka-api:v1
     container_name: kafka-api
     ports:
