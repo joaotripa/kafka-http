@@ -1,5 +1,6 @@
 ---
-version: '2'
+version: '3'
+
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:6.0.0
@@ -50,7 +51,34 @@ services:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'broker:29092'
 
+  control-center:
+    image: confluentinc/cp-enterprise-control-center:6.0.0
+    hostname: control-center
+    container_name: control-center
+    depends_on:
+      - broker
+      - schema-registry
+      - kafka-connect
+      - ksqldb-server
+    ports:
+      - "9021:9021"
+    environment:
+      CONTROL_CENTER_BOOTSTRAP_SERVERS: 'broker:29092'
+      CONTROL_CENTER_CONNECT_CLUSTER: 'kafka-connect:8083'
+      CONTROL_CENTER_KSQL_KSQLDB1_URL: "http://ksqldb-server:8088"
+      CONTROL_CENTER_KSQL_KSQLDB1_ADVERTISED_URL: "http://localhost:8088"
+      CONTROL_CENTER_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+      CONTROL_CENTER_REPLICATION_FACTOR: 1
+      CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS: 1
+      CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
+      CONFLUENT_METRICS_TOPIC_REPLICATION: 1
+      PORT: 9021
+
   kafka-connect:
+    networks:
+      frontend:
+        ipv4_address: 172.16.238.9
+      default:
     image: confluentinc/cp-kafka-connect-base:6.0.0
     hostname: kafka-connect
     container_name: kafka-connect
@@ -90,7 +118,7 @@ services:
       #   mv ./connectors/confluent-hub-components/* ./connectors
       #   rm -rf ./connectors/confluent-hub-components
     volumes:
-      - $PWD/connectors:/connectors
+      - ./connectors:/connectors
     # In the command section, $ are replaced with $$ to avoid the error 'Invalid interpolation format for "command" option'
     command: 
       - bash 
@@ -113,6 +141,10 @@ services:
       - kafka-connect
     ports:
       - "8088:8088"
+    networks:
+      frontend:
+        ipv4_address: 172.16.238.6
+      default:
     environment:
       KSQL_CONFIG_DIR: "/etc/ksql"
       KSQL_BOOTSTRAP_SERVERS: "broker:29092"
@@ -126,8 +158,12 @@ services:
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_REPLICATION_FACTOR: 1
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: 'true'
       KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: 'true'
-
+    
   ksqldb-cli:
+    networks:
+      frontend:
+        ipv4_address: 172.16.238.7
+      default:
     image: confluentinc/cp-ksqldb-cli:6.0.0
     container_name: ksqldb-cli
     depends_on:
@@ -155,9 +191,23 @@ services:
 #Other systems
   kafka-api:
     build: ./app/
-    image: kafka-api:v1
+    image: kafka-api-teste:v1
     container_name: kafka-api
     ports:
       - "5000:5000"
     volumes:
       - ./app:/app
+    networks:
+      frontend:
+       ipv4_address: 172.16.238.8
+      default:
+networks:
+  frontend:
+    # Use a custom driver
+    ipam:
+        driver: default
+        config:
+            - subnet: 172.16.238.0/24
+      
+
+

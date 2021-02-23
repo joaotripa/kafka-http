@@ -6,14 +6,8 @@ This demo uses Docker and docker-compose to deploy confluent platform and uses k
 
 1. **Launch the kafka stack**
 
-On Linux:
 ```
 docker-compose up -d  
-```
-
-On Windows:
-```
-docker-compose -f docker-compose-windows.yml up -d  
 ```
 
 2. **Make sure everything is up and running**
@@ -21,6 +15,10 @@ docker-compose -f docker-compose-windows.yml up -d
 ```
 docker-compose ps  
 ```
+
+Open the browser on http://localhost:9021 to see the confluent kafka control center and check if it is up and healthy.
+
+The control center can be used to configure kafka and its components without coding any line. If this web interface is not needed, it can be deleted from docker-compose to make the kafka stack lighter
 
 3. **Create a test topic and some data using ksqlDB**
 
@@ -67,26 +65,13 @@ PRINT locations FROM BEGINNING;
 
 We'll be using ksqlDB to create the connector but Kafka REST Proxy can be used as well.
 
-Obtaining the address of our Kafka Python API container.
-
-On Linux:
-```	
-KAFKA_API_HOST=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' kafka-api)
-echo ${KAFKA_API_HOST}
-```
-
-On Windows:
-```
-docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' kafka-api
-```
-
-Creating the http sink connector. Copy the IP address given by the commands above and paste it in the respective place of the connector's configurations(http.api.url).
+Create the http sink connector using the Kafka API IP address defined in the docker-compose file and the corresponding service url for this connector.
 ```
 CREATE SINK CONNECTOR SINK_HTTP_LOCATIONS WITH (
 'topics'= 'locations',
 'tasks.max'= '1',
 'connector.class'= 'io.confluent.connect.http.HttpSinkConnector',
-'http.api.url'= 'http://*PASTE_HERE*:5000/api/v1/messages',
+'http.api.url'= 'http://172.16.238.8:5000/api/v1/locations',
 'headers'= 'Content-Type: application/json',
 'value.converter'= 'org.apache.kafka.connect.storage.StringConverter',
 'value.converter.schemas.enable'= 'false',
@@ -103,28 +88,22 @@ CREATE SINK CONNECTOR SINK_HTTP_LOCATIONS WITH (
 
 SHOW CONNECTORS;
 ```
-6. **Testing**
 
-To test the connector, open a terminal and send a request to the API (at port 5000) that returns the messages sent by kafka.
+6. **Verifying data through the API**
 
-```
-curl -X GET http://localhost:5000/api/v1/getmessages
-```
+Open the browser on http://localhost:5000 to see the available connectors.
+To see the messages received through the connector, open http://localhost:5000/api/v1/messages/locations
+
+
 7. **Stopping Kafka stack**
 
-On Linux:
 ```
 docker-compose down
 ```
 
-On Windows:
-```
-docker-compose -f docker-compose-windows.yml down
-```
-
-
 ### Useful links
-
+https://docs.confluent.io/platform/current/quickstart/ce-docker-quickstart.html  
+https://docs.confluent.io/platform/current/quickstart/cos-docker-quickstart.html  
 https://docs.confluent.io/current/connect/kafka-connect-http/index.html  
 https://docs.confluent.io/current/connect/managing/extending.html  
 https://ksqldb.io/quickstart.html  
